@@ -1,13 +1,13 @@
 <x-admin-layout
     title="Roles | LOLA "
-    :Breadcrumbs= "[
+    :breadcrumbs="[
         [
-            'name' => 'Dashboard', 
-            'url' => route('admin.dashboard')
+            'name' => 'Dashboard',
+            'href' => route('admin.dashboard')
         ],
         [
-            'name' => 'Roles', 
-            'url' => route('admin.roles.index')
+            'name' => 'Roles',
+            'href' => route('admin.roles.index')
         ],
     ]"
 >
