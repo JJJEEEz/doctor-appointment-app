@@ -1,0 +1,1 @@
+{{-- Esta vista puede estar vacía, Livewire Tables renderiza la tabla automáticamente --}}

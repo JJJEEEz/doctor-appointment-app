@@ -1,7 +1,8 @@
-@props([
-    'title' => config('app.name', 'Laravel'),
-    'breadcrumbs' => []
-])
+{{-- Usar la sintaxis recomendada para componentes de clase --}}
+@php
+    $title = $title ?? config('app.name', 'Laravel');
+    $breadcrumbs = $breadcrumbs ?? [];
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -34,12 +35,14 @@
         <div class="p-4 sm:ml-64">
             <!-- Margin top 14px -->
             <div class="mt-14">
-                @include('layouts.includes.admin.breadcrumb')
+            @include('layouts.includes.admin.breadcrumb', ['breadcrumbs' => $breadcrumbs])
                 {{ $slot }}
             </div>
         </div>
 
         @stack('modals')
-        <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    <script src="https://unpkg.com/@rappasoft/laravel-livewire-tables@v2.2.0/resources/js/livewire-tables.js"></script>
 
     </body>
+</html>
