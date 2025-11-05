@@ -12,7 +12,7 @@
         [
             'name' => $role->name
         ]
-    ]"
+    ]">
 
     {{-- Formulario para editar el rol --}}
     <div class="p-4 bg-white rounded-lg shadow-md">

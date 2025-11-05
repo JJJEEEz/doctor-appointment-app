@@ -20,7 +20,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://kit.fontawesome.com/a7de8752fc.js" crossorigin="anonymous"></script>
 
-        <wireui:scripts />
+    <wireui:scripts />
         {{-- Livewire Scripts --}}
         @livewireScripts
 
@@ -43,6 +43,41 @@
         @stack('modals')
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     <script src="https://unpkg.com/@rappasoft/laravel-livewire-tables@v2.2.0/resources/js/livewire-tables.js"></script>
+
+    {{-- SweetAlert2 CDN (used for flash alerts from controllers) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Render a SweetAlert from session key 'swal' if present --}}
+    @if(session('swal'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire(@json(session('swal')));
+            });
+        </script>
+    @endif
+
+    {{-- Confirm delete helper used by role actions --}}
+    <script>
+        function confirmRoleDelete(roleId) {
+            const form = document.getElementById('delete-role-' + roleId);
+            if (!form) return;
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción eliminará el rol permanentemente.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
 
     </body>
 </html>
