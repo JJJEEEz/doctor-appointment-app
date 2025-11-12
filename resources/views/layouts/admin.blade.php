@@ -58,13 +58,16 @@
 
     {{-- Confirm delete helper used by role actions --}}
     <script>
-        function confirmRoleDelete(roleId) {
-            const form = document.getElementById('delete-role-' + roleId);
+        function confirmDelete(entity, id, options = {}) {
+            const form = document.getElementById('delete-' + entity + '-' + id);
             if (!form) return;
 
+            const title = options.title || '¿Estás seguro?';
+            const text = options.text || 'Esta acción eliminará el registro permanentemente.';
+
             Swal.fire({
-                title: '¿Estás seguro?',
-                text: 'Esta acción eliminará el rol permanentemente.',
+                title: title,
+                text: text,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -76,6 +79,14 @@
                     form.submit();
                 }
             });
+        }
+
+        function confirmRoleDelete(roleId) {
+            confirmDelete('role', roleId, { title: '¿Estás seguro?', text: 'Esta acción eliminará el rol permanentemente.' });
+        }
+
+        function confirmUserDelete(userId) {
+            confirmDelete('user', userId, { title: '¿Estás seguro?', text: 'Esta acción eliminará el usuario permanentemente.' });
         }
     </script>
 
