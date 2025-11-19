@@ -7,3 +7,7 @@
         <button type="button" onclick="confirmUserDelete({{ $user->id }})" class="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
     </form>
 </div>
+
+@once
+    @include('admin.users.confirm_delete')
+@endonce

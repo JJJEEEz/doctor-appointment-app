@@ -1,8 +1,13 @@
 @php
     $title = 'Ver Usuario';
+    $breadcrumbs = [
+        ['name' => 'Inicio', 'href' => route('dashboard')],
+        ['name' => 'Usuarios', 'href' => route('admin.users.index')],
+        ['name' => 'Ver Usuario'],
+    ];
 @endphp
 
-@component('layouts.admin', ['title' => $title, 'breadcrumbs' => $breadcrumbs ?? []])
+@component('layouts.admin', ['title' => $title, 'breadcrumbs' => $breadcrumbs])
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Usuario #{{ $user->id }}</h2>
 

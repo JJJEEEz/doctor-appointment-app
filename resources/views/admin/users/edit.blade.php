@@ -1,14 +1,20 @@
 @php
     $title = 'Editar Usuario';
+    $breadcrumbs = [
+        ['name' => 'Inicio', 'href' => route('dashboard')],
+        ['name' => 'Usuarios', 'href' => route('admin.users.index')],
+        ['name' => 'Editar Usuario'],
+    ];
 @endphp
 
-@component('layouts.admin', ['title' => $title, 'breadcrumbs' => $breadcrumbs ?? []])
+@component('layouts.admin', ['title' => $title, 'breadcrumbs' => $breadcrumbs])
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Editar Usuario</h2>
 
         <form action="{{ route('admin.users.update', $user) }}" method="POST">
             @csrf
             @method('PUT')
+
 
             <div class="mb-3">
                 <label class="block text-sm">Nombre</label>
@@ -18,6 +24,16 @@
             <div class="mb-3">
                 <label class="block text-sm">Email</label>
                 <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full border p-2" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm">Número ID</label>
+                <input type="text" name="id_number" value="{{ old('id_number', $user->id_number) }}" class="w-full border p-2" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm">Teléfono</label>
+                <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full border p-2" required>
             </div>
 
             <div class="mb-3">

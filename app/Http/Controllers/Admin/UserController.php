@@ -29,9 +29,12 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'id_number' => 'required|string|max:255|unique:users,id_number',
+            'phone' => 'required|string|max:255',
             'password' => 'required|string|min:6|confirmed',
             'roles' => 'array'
         ]);
@@ -39,6 +42,8 @@ class UserController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'id_number' => $data['id_number'],
+            'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
         ]);
 
@@ -74,15 +79,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'id_number' => 'required|string|max:255|unique:users,id_number,' . $user->id,
+            'phone' => 'required|string|max:255',
             'password' => 'nullable|string|min:6|confirmed',
             'roles' => 'array'
         ]);
 
         $user->name = $data['name'];
         $user->email = $data['email'];
+        $user->id_number = $data['id_number'];
+        $user->phone = $data['phone'];
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
