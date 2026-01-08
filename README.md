@@ -93,14 +93,6 @@ Estas actividades representan tareas reales del proyecto y permiten visualizar e
 
 ---
 
-## 🔗 Enlaces del Proyecto
-
-- 📁 **Repositorio del proyecto:**  
-  👉 _(agrega aquí el enlace de tu repositorio público)_
-
-- 🗂️ **Tablero de GitHub Projects:**  
-  👉 _(opcional: enlace directo al tablero Kanban)_
-
 
 ## Sobre Laravel
 
