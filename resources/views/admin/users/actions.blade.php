@@ -1,25 +1,16 @@
 <div class="flex items-center gap-2">
-    {{-- Botón Editar con WireUI --}}
-    <x-button 
-        href="{{ route('admin.users.edit', $user) }}" 
-        xs
-        warning 
-        icon="pencil"
-        label="Editar"
-    />
+    {{-- Botón Editar --}}
+    <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center px-3 py-1 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded transition">
+        <i class="fas fa-edit mr-1"></i> Editar
+    </a>
 
     {{-- Botón Eliminar con confirmación SweetAlert --}}
     <form id="delete-user-{{ $user->id }}" action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline">
         @csrf
         @method('DELETE')
-        <x-button 
-            type="button" 
-            xs
-            negative 
-            icon="trash"
-            label="Eliminar"
-            onclick="confirmUserDelete({{ $user->id }}, '{{ $user->name }}')"
-        />
+        <button type="button" class="inline-flex items-center px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded transition" onclick="confirmUserDelete({{ $user->id }}, '{{ $user->name }}')">
+            <i class="fas fa-trash mr-1"></i> Eliminar
+        </button>
     </form>
 </div>
 
