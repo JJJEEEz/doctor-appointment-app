@@ -8,56 +8,163 @@
 @endphp
 
 @component('layouts.admin', ['title' => $title, 'breadcrumbs' => $breadcrumbs])
-    <div class="bg-white p-4 rounded shadow">
-        <h2 class="text-lg font-semibold mb-4">Editar Usuario</h2>
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-800">Editar Usuario</h2>
 
-        <form action="{{ route('admin.users.update', $user) }}" method="POST">
+        <form action="{{ route('admin.users.update', $user) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Nombre --}}
+                <div>
+                    <x-input 
+                        label="Nombre Completo *" 
+                        name="name" 
+                        placeholder="Ej: Juan Pérez"
+                        value="{{ old('name', $user->name) }}"
+                        autocomplete="name"
+                        icon="user"
+                    />
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <div class="mb-3">
-                <label class="block text-sm">Nombre</label>
-                <input type="text" name="name" value="{{ old('name', $user->name) }}" class="w-full border p-2" required>
+                {{-- Email --}}
+                <div>
+                    <x-input 
+                        label="Email *" 
+                        name="email" 
+                        type="email"
+                        placeholder="ejemplo@correo.com"
+                        value="{{ old('email', $user->email) }}"
+                        autocomplete="email"
+                        icon="mail"
+                    />
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Número de Identificación --}}
+                <div>
+                    <x-input 
+                        label="Número de Identificación *" 
+                        name="id_number" 
+                        placeholder="Ej: 12345678A, DNI, Pasaporte"
+                        value="{{ old('id_number', $user->id_number) }}"
+                        icon="identification"
+                        hint="DNI, Cédula, Pasaporte u otro documento"
+                    />
+                    @error('id_number')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Teléfono --}}
+                <div>
+                    <x-input 
+                        label="Teléfono" 
+                        name="phone" 
+                        placeholder="Ej: +34 123 456 789"
+                        value="{{ old('phone', $user->phone) }}"
+                        autocomplete="tel"
+                        icon="phone"
+                    />
+                    @error('phone')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="block text-sm">Email</label>
-                <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full border p-2" required>
+            {{-- Dirección --}}
+            <div>
+                <x-textarea 
+                    label="Dirección" 
+                    name="address" 
+                    placeholder="Calle, número, ciudad, código postal..."
+                    rows="3"
+                >{{ old('address', $user->address) }}</x-textarea>
+                @error('address')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="mb-3">
-                <label class="block text-sm">Número ID</label>
-                <input type="text" name="id_number" value="{{ old('id_number', $user->id_number) }}" class="w-full border p-2" required>
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Cambiar Contraseña (Opcional)</h3>
+                <p class="text-sm text-gray-600 mb-4">Deja estos campos vacíos si no deseas cambiar la contraseña</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Nueva Contraseña --}}
+                    <div>
+                        <x-inputs.password 
+                            label="Nueva Contraseña" 
+                            name="password" 
+                            placeholder="Mínimo 8 caracteres"
+                            autocomplete="new-password"
+                        />
+                        @error('password')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Confirmar Contraseña --}}
+                    <div>
+                        <x-inputs.password 
+                            label="Confirmar Nueva Contraseña" 
+                            name="password_confirmation" 
+                            placeholder="Repite la contraseña"
+                            autocomplete="new-password"
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="block text-sm">Teléfono</label>
-                <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full border p-2" required>
+            {{-- Rol --}}
+            <div>
+                <x-select 
+                    label="Rol del Usuario *" 
+                    name="role"
+                    placeholder="Seleccione un rol"
+                    :options="$roles->pluck('name', 'name')->toArray()"
+                    option-label="name"
+                    option-value="name"
+                    wire:model="role"
+                />
+                @error('role')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                
+                @php
+                    $currentRole = $user->roles->first()?->name ?? '';
+                @endphp
+                <input type="hidden" name="role" value="{{ old('role', $currentRole) }}" x-ref="roleInput">
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const select = document.querySelector('select[name="role"]');
+                        if (select) {
+                            select.value = "{{ old('role', $currentRole) }}";
+                        }
+                    });
+                </script>
             </div>
 
-            <div class="mb-3">
-                <label class="block text-sm">Nueva contraseña (opcional)</label>
-                <input type="password" name="password" class="w-full border p-2">
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm">Confirmar contraseña</label>
-                <input type="password" name="password_confirmation" class="w-full border p-2">
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm">Roles</label>
-                <select name="roles[]" multiple class="w-full border p-2">
-                    @foreach($roles as $role)
-                        <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>{{ $role->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="flex gap-2">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded">Actualizar</button>
-                <a href="{{ route('admin.users.index') }}" class="px-4 py-2 border rounded">Cancelar</a>
+            {{-- Botones de acción --}}
+            <div class="flex gap-3 pt-4 border-t">
+                <x-button 
+                    type="submit" 
+                    primary 
+                    icon="check"
+                    label="Actualizar Usuario"
+                />
+                <x-button 
+                    href="{{ route('admin.users.index') }}" 
+                    flat 
+                    icon="arrow-left"
+                    label="Cancelar"
+                />
             </div>
         </form>
     </div>
