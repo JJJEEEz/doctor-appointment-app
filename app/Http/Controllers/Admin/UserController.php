@@ -42,23 +42,83 @@ class UserController extends Controller
     {
         // Validaciones mejoradas con formato internacional para ID
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'id_number' => ['required', 'string', 'max:50', 'unique:users,id_number'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', 'exists:roles,name']
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+                'regex:/^[a-záéíóúñ\s\-\']+$/i'
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email'
+            ],
+            'id_number' => [
+                'required',
+                'string',
+                'min:5',
+                'max:50',
+                'regex:/^[a-z0-9\-]+$/i', // Acepta letras, números y guiones (DNI, Pasaporte, etc)
+                'unique:users,id_number'
+            ],
+            'phone' => [
+                'nullable',
+                'digits:10',
+                'regex:/^[0-9]{10}$/'
+            ],
+            'address' => [
+                'nullable',
+                'string',
+                'max:500'
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:255',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/' // Al menos 1 mayúscula, 1 minúscula, 1 número
+            ],
+            'role' => [
+                'required',
+                'string',
+                'exists:roles,name'
+            ]
         ], [
             'name.required' => 'El nombre es obligatorio',
+            'name.string' => 'El nombre debe ser texto',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.regex' => 'El nombre solo puede contener letras, espacios, guiones y apóstrofos',
+            
             'email.required' => 'El email es obligatorio',
+            'email.email' => 'El email debe ser válido',
+            'email.max' => 'El email no puede exceder 255 caracteres',
             'email.unique' => 'Este email ya está registrado',
+            
             'id_number.required' => 'El número de identificación es obligatorio',
+            'id_number.string' => 'El número de identificación debe ser texto',
+            'id_number.min' => 'El número de identificación debe tener al menos 5 caracteres',
+            'id_number.max' => 'El número de identificación no puede exceder 50 caracteres',
+            'id_number.regex' => 'El número de identificación solo puede contener letras, números y guiones',
             'id_number.unique' => 'Este número de identificación ya está registrado',
+            
+            'phone.digits' => 'El teléfono debe tener exactamente 10 dígitos',
+            'phone.regex' => 'El teléfono solo puede contener números',
+            
+            'address.string' => 'La dirección debe ser texto',
+            'address.max' => 'La dirección no puede exceder 500 caracteres',
+            
             'password.required' => 'La contraseña es obligatoria',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+            'password.max' => 'La contraseña no puede exceder 255 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
+            'password.regex' => 'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
+            
             'role.required' => 'Debe seleccionar un rol',
+            'role.string' => 'El rol debe ser texto',
             'role.exists' => 'El rol seleccionado no es válido'
         ]);
 
@@ -118,22 +178,82 @@ class UserController extends Controller
     {
         // Validaciones con unique ignore para el usuario actual
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'id_number' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', 'exists:roles,name']
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+                'regex:/^[a-záéíóúñ\s\-\']+$/i'
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'id_number' => [
+                'required',
+                'string',
+                'min:5',
+                'max:50',
+                'regex:/^[a-z0-9\-]+$/i',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'phone' => [
+                'nullable',
+                'digits:10',
+                'regex:/^[0-9]{10}$/'
+            ],
+            'address' => [
+                'nullable',
+                'string',
+                'max:500'
+            ],
+            'password' => [
+                'nullable',
+                'string',
+                'min:8',
+                'max:255',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/'
+            ],
+            'role' => [
+                'required',
+                'string',
+                'exists:roles,name'
+            ]
         ], [
             'name.required' => 'El nombre es obligatorio',
+            'name.string' => 'El nombre debe ser texto',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.regex' => 'El nombre solo puede contener letras, espacios, guiones y apóstrofos',
+            
             'email.required' => 'El email es obligatorio',
+            'email.email' => 'El email debe ser válido',
+            'email.max' => 'El email no puede exceder 255 caracteres',
             'email.unique' => 'Este email ya está registrado',
+            
             'id_number.required' => 'El número de identificación es obligatorio',
+            'id_number.string' => 'El número de identificación debe ser texto',
+            'id_number.min' => 'El número de identificación debe tener al menos 5 caracteres',
+            'id_number.max' => 'El número de identificación no puede exceder 50 caracteres',
+            'id_number.regex' => 'El número de identificación solo puede contener letras, números y guiones',
             'id_number.unique' => 'Este número de identificación ya está registrado',
+            
+            'phone.digits' => 'El teléfono debe tener exactamente 10 dígitos',
+            'phone.regex' => 'El teléfono solo puede contener números',
+            
+            'address.string' => 'La dirección debe ser texto',
+            'address.max' => 'La dirección no puede exceder 500 caracteres',
+            
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+            'password.max' => 'La contraseña no puede exceder 255 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
+            'password.regex' => 'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
+            
             'role.required' => 'Debe seleccionar un rol',
+            'role.string' => 'El rol debe ser texto',
             'role.exists' => 'El rol seleccionado no es válido'
         ]);
 

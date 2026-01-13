@@ -17,13 +17,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Nombre --}}
                 <div>
-                    <x-input 
-                        label="Nombre Completo *" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                    <input 
+                        type="text"
                         name="name" 
                         placeholder="Ej: Juan Pérez"
                         value="{{ old('name') }}"
-                        autocomplete="name"
-                        icon="user"
+                        pattern="^[a-záéíóúñ\s\-']+$"
+                        maxlength="255"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        required
                     />
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -32,14 +35,14 @@
 
                 {{-- Email --}}
                 <div>
-                    <x-input 
-                        label="Email *" 
-                        name="email" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input 
                         type="email"
+                        name="email" 
                         placeholder="ejemplo@correo.com"
                         value="{{ old('email') }}"
-                        autocomplete="email"
-                        icon="mail"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        required
                     />
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -48,13 +51,14 @@
 
                 {{-- Número de Identificación --}}
                 <div>
-                    <x-input 
-                        label="Número de Identificación *" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Número de Identificación *</label>
+                    <input 
+                        type="text"
                         name="id_number" 
                         placeholder="Ej: 12345678A, DNI, Pasaporte"
                         value="{{ old('id_number') }}"
-                        icon="identification"
-                        hint="DNI, Cédula, Pasaporte u otro documento"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        required
                     />
                     @error('id_number')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -63,14 +67,18 @@
 
                 {{-- Teléfono --}}
                 <div>
-                    <x-input 
-                        label="Teléfono" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input 
+                        type="tel"
                         name="phone" 
-                        placeholder="Ej: +34 123 456 789"
+                        placeholder="Ej: 1234567890"
                         value="{{ old('phone') }}"
-                        autocomplete="tel"
-                        icon="phone"
+                        pattern="^[0-9]{10}$"
+                        maxlength="10"
+                        inputmode="numeric"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                     />
+                    <p class="mt-1 text-xs text-gray-500">Exactamente 10 dígitos numéricos</p>
                     @error('phone')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -79,12 +87,13 @@
 
             {{-- Dirección --}}
             <div>
-                <x-textarea 
-                    label="Dirección" 
+                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <textarea 
                     name="address" 
                     placeholder="Calle, número, ciudad, código postal..."
                     rows="3"
-                >{{ old('address') }}</x-textarea>
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                >{{ old('address') }}</textarea>
                 @error('address')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -93,11 +102,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Contraseña --}}
                 <div>
-                    <x-inputs.password 
-                        label="Contraseña *" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+                    <input 
+                        type="password"
                         name="password" 
                         placeholder="Mínimo 8 caracteres"
-                        autocomplete="new-password"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        required
                     />
                     @error('password')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -106,25 +117,30 @@
 
                 {{-- Confirmar Contraseña --}}
                 <div>
-                    <x-inputs.password 
-                        label="Confirmar Contraseña *" 
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña *</label>
+                    <input 
+                        type="password"
                         name="password_confirmation" 
                         placeholder="Repite la contraseña"
-                        autocomplete="new-password"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        required
                     />
                 </div>
             </div>
 
             {{-- Rol --}}
             <div>
-                <x-select 
-                    label="Rol del Usuario *" 
+                <label class="block text-sm font-medium text-gray-700 mb-1">Rol del Usuario *</label>
+                <select 
                     name="role"
-                    placeholder="Seleccione un rol"
-                    :options="$roles->pluck('name', 'name')->toArray()"
-                    option-label="name"
-                    option-value="name"
-                />
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                >
+                    <option value="">Seleccione un rol</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
+                    @endforeach
+                </select>
                 @error('role')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -132,18 +148,12 @@
 
             {{-- Botones de acción --}}
             <div class="flex gap-3 pt-4 border-t">
-                <x-button 
-                    type="submit" 
-                    primary 
-                    icon="check"
-                    label="Crear Usuario"
-                />
-                <x-button 
-                    href="{{ route('admin.users.index') }}" 
-                    flat 
-                    icon="arrow-left"
-                    label="Cancelar"
-                />
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                    <i class="fas fa-check mr-2"></i> Crear Usuario
+                </button>
+                <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Cancelar
+                </a>
             </div>
         </form>
     </div>
