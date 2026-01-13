@@ -73,6 +73,27 @@ Este proyecto es una implementación de un panel administrativo desarrollado en 
 
 ---
 
+## 🗂️ Tablero de Trabajo — GitHub Projects
+
+Se configuró un tablero de trabajo digital utilizando **GitHub Projects** para organizar y dar seguimiento a las tareas del proyecto.
+
+El tablero está estructurado como **Kanban** e incluye las siguientes columnas:
+
+- 📝 Pendiente
+- 🔧 En proceso
+- 🔍 En revisión
+- ✅ Finalizado
+
+En el tablero se registraron **10 actividades (issues)** relacionadas con el desarrollo del sistema:
+
+- **5 actividades en Backlog (Pendiente)**
+- **5 actividades marcadas como Finalizadas (Done)**
+
+Estas actividades representan tareas reales del proyecto y permiten visualizar el progreso durante el curso.
+
+---
+
+
 ## Sobre Laravel
 
 Laravel es un framework de aplicaciones web con una sintaxis expresiva y elegante, diseñado para hacer el desarrollo una experiencia creativa y agradable. Facilita tareas comunes como:
