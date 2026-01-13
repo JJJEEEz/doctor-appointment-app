@@ -72,6 +72,7 @@
                     <input 
                         type="tel"
                         name="phone" 
+                        id="phone"
                         placeholder="Ej: 1234567890"
                         value="{{ old('phone', $user->phone) }}"
                         pattern="^[0-9]{10}$"
@@ -84,6 +85,13 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
+
+                <script>
+                    document.getElementById('phone').addEventListener('input', function(e) {
+                        // Permite solo números
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    });
+                </script>
             </div>
 
             {{-- Dirección --}}
