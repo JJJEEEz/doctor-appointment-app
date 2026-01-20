@@ -296,7 +296,7 @@ class UserController extends Controller
                 'icon' => 'error'
             ]);
             
-            return redirect()->route('admin.users.index');
+            return abort(403, 'No puedes eliminar tu propia cuenta.');
         }
 
         // Desvincular roles antes de eliminar
