@@ -53,7 +53,7 @@ class RoleController extends Controller
      */
     public function show(string $id)
     {
-        $role = \Spatie\Permission\Models\Role::findOrFail($id);
+        $role = Role::findOrFail($id);
         return view('admin.roles.show', compact('role'));
     }
 
@@ -62,7 +62,7 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        $role = \Spatie\Permission\Models\Role::findOrFail($id);
+        $role = Role::findOrFail($id);
         return view('admin.roles.edit', compact('role'));
     }
 
@@ -95,7 +95,7 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        $role = \Spatie\Permission\Models\Role::findOrFail($id);
+        $role = Role::findOrFail($id);
         $role->delete();
 
         return redirect()->route('admin.roles.index')->with('message', 'Rol eliminado correctamente.');
