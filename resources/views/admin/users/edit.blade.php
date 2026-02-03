@@ -148,6 +148,7 @@
                 @endphp
                 <select 
                     name="role"
+                    id="role"
                     class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                     required
                 >
@@ -160,6 +161,38 @@
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+
+            {{-- Tipo de sangre (solo Paciente) --}}
+            <div id="blood-type-field" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Sangre *</label>
+                <select 
+                    name="blood_type_id"
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                >
+                    <option value="">Seleccione un tipo de sangre</option>
+                    @foreach($bloodTypes as $bloodType)
+                        <option value="{{ $bloodType->id }}" {{ old('blood_type_id', $user->patient?->blood_type_id) == $bloodType->id ? 'selected' : '' }}>{{ $bloodType->name }}</option>
+                    @endforeach
+                </select>
+                @error('blood_type_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <script>
+                (function () {
+                    const roleSelect = document.getElementById('role');
+                    const bloodTypeField = document.getElementById('blood-type-field');
+
+                    function toggleBloodType() {
+                        const isPaciente = roleSelect.value === 'Paciente';
+                        bloodTypeField.classList.toggle('hidden', !isPaciente);
+                    }
+
+                    roleSelect.addEventListener('change', toggleBloodType);
+                    toggleBloodType();
+                })();
+            </script>
 
             {{-- Botones de acción --}}
             <div class="flex gap-3 pt-4 border-t">

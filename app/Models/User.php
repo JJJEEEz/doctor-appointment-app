@@ -69,4 +69,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relación 1 a 1 con Patient
+     * Un usuario puede tener un paciente asociado
+     */
+    public function patient()
+    {
+        return $this->hasOne(Patient::class);
+    }
 }

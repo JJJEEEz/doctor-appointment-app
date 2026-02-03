@@ -15,12 +15,18 @@ $links = [
         'icon' => 'fa-solid fa-user-shield',
         'href' => route('admin.roles.index'),
         'active' => request()->routeIs('admin.roles.*'),
-],
+    ],
     [
         'name' => 'Usuarios',
         'icon' => 'fa-solid fa-users',
         'href' => route('admin.users.index'),
         'active' => request()->routeIs('admin.users.*'),
+    ],
+    [
+        'name' => 'Pacientes',
+        'icon' => 'fa-solid fa-user-injured',
+        'href' => route('admin.patients.index'),
+        'active' => request()->routeIs('admin.patients.*'),
     ]
 ];
 @endphp

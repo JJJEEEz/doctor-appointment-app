@@ -9,14 +9,16 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        $user = User::create([
-            'name' => 'Rodrigo',
-            'email' => 'rodrigo@software.com.mx',
-            'password' => bcrypt('password'),
-            'id_number' => '123456789',
-            'phone' => '1234567890',
-            'address' => 'Calle Falsa 123',
-        ]);
-        $user->assignRole('doctor');
+        $user = User::firstOrCreate(
+            ['email' => 'rodrigo@software.com.mx'],
+            [
+                'name' => 'Rodrigo',
+                'password' => bcrypt('password'),
+                'id_number' => '123456789',
+                'phone' => '1234567890',
+                'address' => 'Calle Falsa 123',
+            ]
+        );
+        $user->syncRoles(['Doctor']);
     }
 }

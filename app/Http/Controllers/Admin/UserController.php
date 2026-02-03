@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Patient;
+use App\Models\BloodType;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -27,12 +29,13 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
+        $bloodTypes = BloodType::all();
         $breadcrumbs = [
             ['name' => 'Usuarios', 'href' => route('admin.users.index')],
             ['name' => 'Crear']
         ];
 
-        return view('admin.users.create', compact('roles', 'breadcrumbs'));
+        return view('admin.users.create', compact('roles', 'bloodTypes', 'breadcrumbs'));
     }
 
     /**
@@ -85,6 +88,11 @@ class UserController extends Controller
                 'required',
                 'string',
                 'exists:roles,name'
+            ],
+            'blood_type_id' => [
+                'required_if:role,Paciente',
+                'nullable',
+                'exists:blood_types,id'
             ]
         ], [
             'name.required' => 'El nombre es obligatorio',
@@ -119,7 +127,10 @@ class UserController extends Controller
             
             'role.required' => 'Debe seleccionar un rol',
             'role.string' => 'El rol debe ser texto',
-            'role.exists' => 'El rol seleccionado no es válido'
+            'role.exists' => 'El rol seleccionado no es válido',
+
+            'blood_type_id.required_if' => 'Debe seleccionar un tipo de sangre para el paciente',
+            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido'
         ]);
 
         // Crear usuario con contraseña hasheada
@@ -134,6 +145,18 @@ class UserController extends Controller
 
         // Asignar rol usando Spatie Permission
         $user->assignRole($data['role']);
+
+        // Si el rol es paciente, crear automáticamente el registro de paciente
+        if ($data['role'] === 'Paciente') {
+            Patient::create([
+                'user_id' => $user->id,
+                'blood_type_id' => $data['blood_type_id'],
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+            ]);
+        }
 
         session()->flash('swal', [
             'title' => '¡Éxito!', 
@@ -163,12 +186,13 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
+        $bloodTypes = BloodType::all();
         $breadcrumbs = [
             ['name' => 'Usuarios', 'href' => route('admin.users.index')],
             ['name' => 'Editar']
         ];
 
-        return view('admin.users.edit', compact('user', 'roles', 'breadcrumbs'));
+        return view('admin.users.edit', compact('user', 'roles', 'bloodTypes', 'breadcrumbs'));
     }
 
     /**
@@ -221,6 +245,11 @@ class UserController extends Controller
                 'required',
                 'string',
                 'exists:roles,name'
+            ],
+            'blood_type_id' => [
+                'required_if:role,Paciente',
+                'nullable',
+                'exists:blood_types,id'
             ]
         ], [
             'name.required' => 'El nombre es obligatorio',
@@ -254,7 +283,10 @@ class UserController extends Controller
             
             'role.required' => 'Debe seleccionar un rol',
             'role.string' => 'El rol debe ser texto',
-            'role.exists' => 'El rol seleccionado no es válido'
+            'role.exists' => 'El rol seleccionado no es válido',
+
+            'blood_type_id.required_if' => 'Debe seleccionar un tipo de sangre para el paciente',
+            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido'
         ]);
 
         // Actualizar campos del usuario
@@ -271,8 +303,37 @@ class UserController extends Controller
 
         $user->save();
 
+        // Obtener el rol anterior
+        $previousRole = $user->roles->first()?->name;
+
         // Sincronizar rol (reemplaza todos los roles previos)
         $user->syncRoles([$data['role']]);
+
+        // Si el nuevo rol es paciente y no tenía un registro de paciente, crearlo
+        if ($data['role'] === 'Paciente' && !$user->patient) {
+            Patient::create([
+                'user_id' => $user->id,
+                'blood_type_id' => $data['blood_type_id'],
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+            ]);
+        }
+        // Si el nuevo rol NO es paciente pero tenía registro de paciente, eliminarlo
+        elseif ($data['role'] !== 'Paciente' && $user->patient) {
+            $user->patient->delete();
+        }
+        // Si sigue siendo paciente, actualizar los datos
+        elseif ($data['role'] === 'Paciente' && $user->patient) {
+            $user->patient->update([
+                'blood_type_id' => $data['blood_type_id'],
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+            ]);
+        }
 
         session()->flash('swal', [
             'title' => '¡Éxito!', 
