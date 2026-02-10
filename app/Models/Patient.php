@@ -14,6 +14,14 @@ class Patient extends Model
         'email',
         'phone',
         'address',
+        'known_allergies',
+        'chronic_diseases',
+        'surgical_history',
+        'family_history',
+        'observations',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relationship',
     ];
 
     /**
