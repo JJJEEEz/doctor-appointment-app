@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\BloodType;
+use App\Models\Specialty;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -31,12 +32,13 @@ class UserController extends Controller
     {
         $roles = Role::all();
         $bloodTypes = BloodType::all();
+            $specialties = Specialty::query()->orderBy('name')->get();
         $breadcrumbs = [
             ['name' => 'Usuarios', 'href' => route('admin.users.index')],
             ['name' => 'Crear']
         ];
 
-        return view('admin.users.create', compact('roles', 'bloodTypes', 'breadcrumbs'));
+            return view('admin.users.create', compact('roles', 'bloodTypes', 'specialties', 'breadcrumbs'));
     }
 
     /**
@@ -94,7 +96,30 @@ class UserController extends Controller
                 'required_if:role,Paciente',
                 'nullable',
                 'exists:blood_types,id'
-            ]
+            ],
+            'speciality_id' => [
+                'required_if:role,Doctor',
+                'nullable',
+                'exists:specialties,id'
+            ],
+            'medical_license_number' => [
+                'required_if:role,Doctor',
+                'nullable',
+                'string',
+                'max:255'
+            ],
+            'biography' => [
+                'nullable',
+                'string'
+            ],
+            'known_allergies' => ['nullable', 'string', 'max:255'],
+            'chronic_diseases' => ['nullable', 'string', 'max:255'],
+            'surgical_history' => ['nullable', 'string', 'max:255'],
+            'family_history' => ['nullable', 'string', 'max:255'],
+            'observations' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
+            'emergency_contact_relationship' => ['nullable', 'string', 'max:255']
         ], [
             'name.required' => 'El nombre es obligatorio',
             'name.string' => 'El nombre debe ser texto',
@@ -131,7 +156,11 @@ class UserController extends Controller
             'role.exists' => 'El rol seleccionado no es válido',
 
             'blood_type_id.required_if' => 'Debe seleccionar un tipo de sangre para el paciente',
-            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido'
+            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido',
+            'speciality_id.required_if' => 'Debe seleccionar una especialidad para el doctor',
+            'speciality_id.exists' => 'La especialidad seleccionada no es válida',
+            'medical_license_number.required_if' => 'Debe ingresar el número de cédula profesional',
+            'medical_license_number.max' => 'La cédula profesional no puede exceder 255 caracteres'
         ]);
 
         // Crear usuario con contraseña hasheada
@@ -156,12 +185,23 @@ class UserController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'address' => $user->address,
+                'known_allergies' => $data['known_allergies'] ?? null,
+                'chronic_diseases' => $data['chronic_diseases'] ?? null,
+                'surgical_history' => $data['surgical_history'] ?? null,
+                'family_history' => $data['family_history'] ?? null,
+                'observations' => $data['observations'] ?? null,
+                'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? null,
+                'emergency_contact_relationship' => $data['emergency_contact_relationship'] ?? null,
             ]);
         }
 
         if ($data['role'] === 'Doctor') {
             Doctor::create([
                 'user_id' => $user->id,
+                'speciality_id' => $data['speciality_id'] ?? null,
+                'medical_license_number' => $data['medical_license_number'] ?? null,
+                'biography' => $data['biography'] ?? null,
             ]);
         }
 
@@ -194,12 +234,13 @@ class UserController extends Controller
     {
         $roles = Role::all();
         $bloodTypes = BloodType::all();
+        $specialties = Specialty::query()->orderBy('name')->get();
         $breadcrumbs = [
             ['name' => 'Usuarios', 'href' => route('admin.users.index')],
             ['name' => 'Editar']
         ];
 
-        return view('admin.users.edit', compact('user', 'roles', 'bloodTypes', 'breadcrumbs'));
+        return view('admin.users.edit', compact('user', 'roles', 'bloodTypes', 'specialties', 'breadcrumbs'));
     }
 
     /**
@@ -257,7 +298,30 @@ class UserController extends Controller
                 'required_if:role,Paciente',
                 'nullable',
                 'exists:blood_types,id'
-            ]
+            ],
+            'speciality_id' => [
+                'required_if:role,Doctor',
+                'nullable',
+                'exists:specialties,id'
+            ],
+            'medical_license_number' => [
+                'required_if:role,Doctor',
+                'nullable',
+                'string',
+                'max:255'
+            ],
+            'biography' => [
+                'nullable',
+                'string'
+            ],
+            'known_allergies' => ['nullable', 'string', 'max:255'],
+            'chronic_diseases' => ['nullable', 'string', 'max:255'],
+            'surgical_history' => ['nullable', 'string', 'max:255'],
+            'family_history' => ['nullable', 'string', 'max:255'],
+            'observations' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
+            'emergency_contact_relationship' => ['nullable', 'string', 'max:255']
         ], [
             'name.required' => 'El nombre es obligatorio',
             'name.string' => 'El nombre debe ser texto',
@@ -293,7 +357,11 @@ class UserController extends Controller
             'role.exists' => 'El rol seleccionado no es válido',
 
             'blood_type_id.required_if' => 'Debe seleccionar un tipo de sangre para el paciente',
-            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido'
+            'blood_type_id.exists' => 'El tipo de sangre seleccionado no es válido',
+            'speciality_id.required_if' => 'Debe seleccionar una especialidad para el doctor',
+            'speciality_id.exists' => 'La especialidad seleccionada no es válida',
+            'medical_license_number.required_if' => 'Debe ingresar el número de cédula profesional',
+            'medical_license_number.max' => 'La cédula profesional no puede exceder 255 caracteres'
         ]);
 
         // Actualizar campos del usuario
@@ -325,6 +393,14 @@ class UserController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'address' => $user->address,
+                'known_allergies' => $data['known_allergies'] ?? null,
+                'chronic_diseases' => $data['chronic_diseases'] ?? null,
+                'surgical_history' => $data['surgical_history'] ?? null,
+                'family_history' => $data['family_history'] ?? null,
+                'observations' => $data['observations'] ?? null,
+                'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? null,
+                'emergency_contact_relationship' => $data['emergency_contact_relationship'] ?? null,
             ]);
         }
         // Si el nuevo rol NO es paciente pero tenía registro de paciente, eliminarlo
@@ -339,13 +415,32 @@ class UserController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'address' => $user->address,
+                'known_allergies' => $data['known_allergies'] ?? null,
+                'chronic_diseases' => $data['chronic_diseases'] ?? null,
+                'surgical_history' => $data['surgical_history'] ?? null,
+                'family_history' => $data['family_history'] ?? null,
+                'observations' => $data['observations'] ?? null,
+                'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? null,
+                'emergency_contact_relationship' => $data['emergency_contact_relationship'] ?? null,
             ]);
         }
 
-        if ($data['role'] === 'Doctor' && !$user->doctor) {
-            Doctor::create([
-                'user_id' => $user->id,
-            ]);
+        if ($data['role'] === 'Doctor') {
+            if (!$user->doctor) {
+                Doctor::create([
+                    'user_id' => $user->id,
+                    'speciality_id' => $data['speciality_id'] ?? null,
+                    'medical_license_number' => $data['medical_license_number'] ?? null,
+                    'biography' => $data['biography'] ?? null,
+                ]);
+            } else {
+                $user->doctor->update([
+                    'speciality_id' => $data['speciality_id'] ?? null,
+                    'medical_license_number' => $data['medical_license_number'] ?? null,
+                    'biography' => $data['biography'] ?? null,
+                ]);
+            }
         } elseif ($data['role'] !== 'Doctor' && $user->doctor) {
             $user->doctor->delete();
         }
