@@ -78,4 +78,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(Patient::class);
     }
+
+    /**
+     * Relacion 1 a 1 con Doctor
+     * Un usuario puede tener un doctor asociado
+     */
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
 }

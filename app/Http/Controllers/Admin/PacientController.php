@@ -22,7 +22,7 @@ class PacientController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.patients.create');
     }
 
     /**
@@ -38,7 +38,7 @@ class PacientController extends Controller
      */
     public function show(Patient $patient)
     {
-        //
+        return view('admin.patients.show', compact('patient'));
     }
 
     /**

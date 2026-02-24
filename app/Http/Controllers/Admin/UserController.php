@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Patient;
+use App\Models\Doctor;
 use App\Models\BloodType;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -155,6 +156,12 @@ class UserController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'address' => $user->address,
+            ]);
+        }
+
+        if ($data['role'] === 'Doctor') {
+            Doctor::create([
+                'user_id' => $user->id,
             ]);
         }
 
@@ -333,6 +340,14 @@ class UserController extends Controller
                 'phone' => $user->phone,
                 'address' => $user->address,
             ]);
+        }
+
+        if ($data['role'] === 'Doctor' && !$user->doctor) {
+            Doctor::create([
+                'user_id' => $user->id,
+            ]);
+        } elseif ($data['role'] !== 'Doctor' && $user->doctor) {
+            $user->doctor->delete();
         }
 
         session()->flash('swal', [
