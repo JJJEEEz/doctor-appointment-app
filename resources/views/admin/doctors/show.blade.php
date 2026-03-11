@@ -71,6 +71,10 @@
                     <i class="fas fa-edit mr-2"></i>
                     Editar
                 </x-wire-button>
+                <x-wire-button href="{{ route('admin.doctors.availability.edit', $doctor) }}">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Horarios
+                </x-wire-button>
                 <x-wire-button href="{{ route('admin.doctors.index') }}" outline gray>
                     <i class="fas fa-arrow-left mr-2"></i>
                     Volver

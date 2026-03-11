@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             BloodTypeSeeder::class,
             SpecialtySeeder::class,
             UserSeeder::class,
+            DoctorAvailabilitySeeder::class,
+            AppointmentSeeder::class,
         ]);
     }
 }

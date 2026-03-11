@@ -33,6 +33,12 @@ $links = [
         'icon' => 'fa-solid fa-user-doctor',
         'href' => route('admin.doctors.index'),
         'active' => request()->routeIs('admin.doctors.*'),
+    ],
+    [
+        'name' => 'Citas medicas',
+        'icon' => 'fa-solid fa-calendar-check',
+        'href' => route('admin.appointments.index'),
+        'active' => request()->routeIs('admin.appointments.*'),
     ]
 ];
 @endphp
