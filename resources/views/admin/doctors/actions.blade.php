@@ -1,4 +1,8 @@
 <div class="flex items-center gap-2">
+    <a href="{{ route('admin.doctors.schedules', $doctor) }}" class="inline-flex items-center px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition" title="Gestionar horarios">
+        <i class="fas fa-clock mr-1"></i> Horarios
+    </a>
+
     {{-- Botón Ver --}}
     <a href="{{ route('admin.doctors.show', $doctor) }}" class="inline-flex items-center px-3 py-1 text-sm bg-green-500 hover:bg-green-600 text-white rounded transition">
         <i class="fas fa-eye mr-1"></i> Ver

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\ConsultationController;
 use App\Http\Controllers\Admin\DoctorController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DoctorAvailabilityController;
@@ -11,6 +12,11 @@ use App\Http\Controllers\Admin\PacientController;
 Route::get('/', function () {
     return view(('admin.dashboard'));
 })->name('dashboard');
+
+// Test Livewire
+Route::get('/test-livewire', function() {
+    return view('admin.test-livewire');
+});
 
 // Gestion de roles
 Route::resource(
@@ -31,6 +37,9 @@ Route::get('doctors/{doctor}/show', [DoctorController::class, 'show'])->name('do
 // Gestion de disponibilidad de doctores
 Route::get('doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'edit'])->name('doctors.availability.edit');
 Route::put('doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'update'])->name('doctors.availability.update');
+Route::get('doctors/{doctor}/schedules', [DoctorAvailabilityController::class, 'edit'])->name('doctors.schedules');
 
 // Gestion de citas medicas
 Route::resource('appointments', AppointmentController::class);
+Route::get('appointments/{appointment}/consultation', [ConsultationController::class, 'show'])->name('appointments.consultation');
+Route::post('appointments/{appointment}/consultation', [ConsultationController::class, 'store'])->name('appointments.consultation.store');

@@ -13,18 +13,23 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->date('appointment_date');
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+            $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
+            $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->enum('status', ['Programado', 'Completado', 'Cancelado'])->default('Programado');
-            $table->text('notes')->nullable();
+            $table->unsignedInteger('duration')->default(15);
+            $table->text('reason')->nullable();
+            $table->tinyInteger('status')->default(1);
+            $table->text('diagnosis')->nullable();
+            $table->text('treatment')->nullable();
+            $table->text('consultation_notes')->nullable();
+            $table->json('prescriptions')->nullable();
             $table->timestamps();
 
             $table->index([
                 'doctor_id',
-                'appointment_date',
+                'date',
                 'start_time',
                 'end_time',
                 'status',
@@ -32,7 +37,7 @@ return new class extends Migration
 
             $table->index([
                 'patient_id',
-                'appointment_date',
+                'date',
                 'start_time',
                 'end_time',
             ], 'appointments_patient_schedule_index');

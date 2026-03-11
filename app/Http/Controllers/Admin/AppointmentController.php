@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
-use App\Models\Doctor;
 use App\Models\Patient;
-use App\Models\Specialty;
 use App\Services\AppointmentConflictService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -30,59 +28,13 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
+    public function create()
     {
-        $filters = [
-            'appointment_date' => $request->query('appointment_date', old('appointment_date')),
-            'start_time' => $request->query('start_time', old('start_time')),
-            'speciality_id' => $request->query('speciality_id', old('speciality_id')),
-        ];
-
-        $filters['end_time'] = !empty($filters['start_time'])
-            ? $this->computeEndTime($filters['start_time'])
-            : null;
-
-        $availableDoctors = collect();
-        $searchPerformed = $this->hasSearchFilters($filters);
-        $nearbyAvailability = ['before' => null, 'after' => null];
-
-        if ($searchPerformed) {
-            $request->validate([
-                'appointment_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
-                'start_time' => ['required', 'date_format:H:i'],
-                'speciality_id' => ['nullable', 'exists:specialties,id'],
-            ]);
-
-            $this->validateAppointmentSchedule($filters['appointment_date'], $filters['start_time']);
-
-            $availableDoctors = $this->conflictService
-                ->availableDoctors(
-                    $filters['appointment_date'],
-                    $filters['start_time'],
-                    $filters['end_time'],
-                    $filters['speciality_id'] ? (int) $filters['speciality_id'] : null
-                )
-                ->get();
-
-            if ($availableDoctors->isEmpty()) {
-                $nearbyAvailability = $this->nearestAvailableSlots(
-                    $filters['appointment_date'],
-                    $filters['start_time'],
-                    $filters['speciality_id'] ? (int) $filters['speciality_id'] : null
-                );
-            }
-        }
-
         return view('admin.appointments.create', [
             'patients' => Patient::query()->orderBy('name')->get(),
-            'specialties' => Specialty::query()->whereHas('doctors')->orderBy('name')->get(),
-            'availableDoctors' => $availableDoctors,
-            'filters' => $filters,
-            'statuses' => $this->statuses(),
+            'doctors' => \App\Models\Doctor::query()->with('user')->orderBy('id')->get(),
+            'statusOptions' => $this->statusOptions(),
             'today' => now()->format('Y-m-d'),
-            'minTimeToday' => now()->addHours(2)->format('H:i'),
-            'searchPerformed' => $searchPerformed,
-            'nearbyAvailability' => $nearbyAvailability,
         ]);
     }
 
@@ -92,9 +44,7 @@ class AppointmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateAppointmentData($request);
-
-        $this->ensureDoctorSpecialityMatches($data);
-        $this->validateAvailabilityAndConflicts($data);
+        $this->validateConflicts($data);
 
         Appointment::create($data);
 
@@ -120,52 +70,16 @@ class AppointmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Request $request, Appointment $appointment)
+    public function edit(Appointment $appointment)
     {
         $appointment->load(['doctor.user', 'doctor.speciality']);
-
-        $filters = [
-            'appointment_date' => $request->query('appointment_date', Carbon::parse($appointment->appointment_date)->format('Y-m-d')),
-            'start_time' => $request->query('start_time', substr((string) $appointment->start_time, 0, 5)),
-            'speciality_id' => $request->query('speciality_id', $appointment->doctor?->speciality_id),
-        ];
-
-        $filters['end_time'] = $this->computeEndTime($filters['start_time']);
-
-        $availableDoctors = collect();
-
-        if ($this->hasSearchFilters($filters)) {
-            $request->validate([
-                'appointment_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
-                'start_time' => ['nullable', 'date_format:H:i'],
-                'speciality_id' => ['nullable', 'exists:specialties,id'],
-            ]);
-
-            $availableDoctors = $this->conflictService
-                ->availableDoctors(
-                    $filters['appointment_date'],
-                    $filters['start_time'],
-                    $filters['end_time'],
-                    $filters['speciality_id'] ? (int) $filters['speciality_id'] : null
-                )
-                ->get();
-
-            if (!$availableDoctors->contains('id', $appointment->doctor_id)) {
-                $availableDoctors->push($appointment->doctor);
-            }
-
-            $availableDoctors = $availableDoctors->unique('id')->values();
-        }
 
         return view('admin.appointments.edit', [
             'appointment' => $appointment,
             'patients' => Patient::query()->orderBy('name')->get(),
-            'specialties' => Specialty::query()->whereHas('doctors')->orderBy('name')->get(),
-            'availableDoctors' => $availableDoctors,
-            'filters' => $filters,
-            'statuses' => $this->statuses(),
+            'doctors' => \App\Models\Doctor::query()->with('user')->orderBy('id')->get(),
+            'statusOptions' => $this->statusOptions(),
             'today' => now()->format('Y-m-d'),
-            'minTimeToday' => now()->addHours(2)->format('H:i'),
         ]);
     }
 
@@ -175,9 +89,7 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment): RedirectResponse
     {
         $data = $this->validateAppointmentData($request);
-
-        $this->ensureDoctorSpecialityMatches($data);
-        $this->validateAvailabilityAndConflicts($data, $appointment->id);
+        $this->validateConflicts($data, $appointment->id);
 
         $appointment->update($data);
 
@@ -187,7 +99,7 @@ class AppointmentController extends Controller
             'icon' => 'success',
         ]);
 
-        return redirect()->route('admin.appointments.edit', $appointment);
+        return redirect()->route('admin.appointments.index');
     }
 
     /**
@@ -211,176 +123,56 @@ class AppointmentController extends Controller
         $data = $request->validate([
             'patient_id' => ['required', 'exists:patients,id'],
             'doctor_id' => ['required', 'exists:doctors,id'],
-            'appointment_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
-            'status' => ['required', 'in:' . implode(',', $this->statuses())],
-            'notes' => ['nullable', 'string', 'max:2000'],
-            'speciality_id' => ['nullable', 'exists:specialties,id'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'reason' => ['nullable', 'string'],
+            'status' => ['required', 'integer', 'in:0,1,2'],
         ], [
             'patient_id.required' => 'Debe seleccionar un paciente.',
-            'doctor_id.required' => 'Debe seleccionar un doctor disponible.',
-            'appointment_date.required' => 'Debe indicar la fecha de la cita.',
-            'appointment_date.after_or_equal' => 'La fecha de la cita no puede ser en el pasado.',
-            'start_time.required' => 'Debe indicar la hora de la cita.',
+            'doctor_id.required' => 'Debe seleccionar un doctor.',
+            'date.required' => 'Debe indicar la fecha de la cita.',
+            'date.after_or_equal' => 'La fecha de la cita no puede ser en el pasado.',
+            'start_time.required' => 'Debe indicar la hora de inicio.',
+            'end_time.required' => 'Debe indicar la hora de fin.',
+            'end_time.after' => 'La hora de termino debe ser mayor a la hora de inicio.',
             'status.required' => 'Debe seleccionar el estado de la cita.',
         ]);
 
-        $this->validateAppointmentSchedule($data['appointment_date'], $data['start_time']);
-
-        $data['end_time'] = $this->computeEndTime($data['start_time']);
+        $data['duration'] = $this->computeDuration($data['start_time'], $data['end_time']);
 
         return $data;
     }
 
-    private function validateAvailabilityAndConflicts(array $data, ?int $ignoreAppointmentId = null): void
+    private function validateConflicts(array $data, ?int $ignoreAppointmentId = null): void
     {
-        $doctor = Doctor::query()->findOrFail((int) $data['doctor_id']);
-        $date = Carbon::createFromFormat('Y-m-d', $data['appointment_date']);
-
-        if (empty($this->conflictService->requiredSlots($data['start_time'], $data['end_time']))) {
-            throw ValidationException::withMessages([
-                'start_time' => 'La hora de la cita no corresponde a un bloque valido de horario.',
-            ]);
-        }
-
-        if (!$this->conflictService->hasAvailability($doctor, $date, $data['start_time'], $data['end_time'])) {
-            throw ValidationException::withMessages([
-                'doctor_id' => 'El doctor seleccionado no tiene disponibilidad completa en el rango horario indicado.',
-            ]);
-        }
-
-        if ($this->conflictService->doctorHasConflict((int) $data['doctor_id'], $data['appointment_date'], $data['start_time'], $data['end_time'], $ignoreAppointmentId)) {
+        if ($this->conflictService->doctorHasConflict((int) $data['doctor_id'], $data['date'], $data['start_time'], $data['end_time'], $ignoreAppointmentId)) {
             throw ValidationException::withMessages([
                 'doctor_id' => 'El doctor ya tiene una cita programada en ese horario.',
             ]);
         }
 
-        if ($this->conflictService->patientHasConflict((int) $data['patient_id'], $data['appointment_date'], $data['start_time'], $data['end_time'], $ignoreAppointmentId)) {
+        if ($this->conflictService->patientHasConflict((int) $data['patient_id'], $data['date'], $data['start_time'], $data['end_time'], $ignoreAppointmentId)) {
             throw ValidationException::withMessages([
                 'patient_id' => 'El paciente ya tiene una cita en ese horario.',
             ]);
         }
     }
 
-    private function ensureDoctorSpecialityMatches(array $data): void
+    private function computeDuration(string $startTime, string $endTime): int
     {
-        if (empty($data['speciality_id'])) {
-            return;
-        }
+        $start = Carbon::createFromFormat('H:i', $startTime);
+        $end = Carbon::createFromFormat('H:i', $endTime);
 
-        $doctorMatchesSpeciality = Doctor::query()
-            ->whereKey((int) $data['doctor_id'])
-            ->where('speciality_id', (int) $data['speciality_id'])
-            ->exists();
-
-        if (!$doctorMatchesSpeciality) {
-            throw ValidationException::withMessages([
-                'doctor_id' => 'El doctor seleccionado no pertenece a la especialidad indicada.',
-            ]);
-        }
+        return max(15, $start->diffInMinutes($end));
     }
 
-    private function statuses(): array
+    private function statusOptions(): array
     {
-        return ['Programado', 'Completado', 'Cancelado'];
-    }
-
-    private function hasSearchFilters(array $filters): bool
-    {
-        return !empty($filters['appointment_date'])
-            && !empty($filters['start_time']);
-    }
-
-    private function computeEndTime(string $startTime): string
-    {
-        return Carbon::createFromFormat('H:i', substr($startTime, 0, 5))->addMinutes(30)->format('H:i');
-    }
-
-    private function validateAppointmentSchedule(string $date, string $startTime): void
-    {
-        $start = Carbon::createFromFormat('H:i', substr($startTime, 0, 5));
-        $workStart = Carbon::createFromFormat('H:i', '08:00');
-        $workEnd = Carbon::createFromFormat('H:i', '19:30');
-
-        if ($start->lt($workStart) || $start->gt($workEnd)) {
-            throw ValidationException::withMessages([
-                'start_time' => 'Las citas solo pueden agendarse entre las 08:00 y las 19:30 (la ultima cita finaliza a las 20:00).',
-            ]);
-        }
-
-        if ($date === Carbon::today()->format('Y-m-d')) {
-            $minTime = Carbon::now()->addHours(2);
-            $appointmentTime = Carbon::today()->setTimeFromTimeString(substr($startTime, 0, 5) . ':00');
-
-            if ($appointmentTime->lt($minTime)) {
-                throw ValidationException::withMessages([
-                    'start_time' => 'Para citas de hoy, la hora debe ser al menos 2 horas mayor a la actual (minimo: ' . $minTime->format('H:i') . ').',
-                ]);
-            }
-        }
-    }
-
-    /**
-     * @return array{before: array{start: string, end: string, doctors_count: int}|null, after: array{start: string, end: string, doctors_count: int}|null}
-     */
-    private function nearestAvailableSlots(string $date, string $targetStartTime, ?int $specialityId = null): array
-    {
-        $before = null;
-        $after = null;
-        $target = Carbon::createFromFormat('H:i', substr($targetStartTime, 0, 5));
-
-        foreach ($this->timeSlots() as $slotStart) {
-            if ($slotStart === $targetStartTime) {
-                continue;
-            }
-
-            $slotEnd = $this->computeEndTime($slotStart);
-            $availableCount = $this->conflictService
-                ->availableDoctors($date, $slotStart, $slotEnd, $specialityId)
-                ->count();
-
-            if ($availableCount === 0) {
-                continue;
-            }
-
-            $slot = Carbon::createFromFormat('H:i', $slotStart);
-
-            if ($slot->lt($target)) {
-                $before = [
-                    'start' => $slotStart,
-                    'end' => $slotEnd,
-                    'doctors_count' => $availableCount,
-                ];
-                continue;
-            }
-
-            if ($slot->gt($target) && $after === null) {
-                $after = [
-                    'start' => $slotStart,
-                    'end' => $slotEnd,
-                    'doctors_count' => $availableCount,
-                ];
-                break;
-            }
-        }
-
-        return ['before' => $before, 'after' => $after];
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function timeSlots(): array
-    {
-        $slots = [];
-        $cursor = Carbon::createFromFormat('H:i', '08:00');
-        $limit = Carbon::createFromFormat('H:i', '19:30');
-
-        while ($cursor->lte($limit)) {
-            $slots[] = $cursor->format('H:i');
-            $cursor->addMinutes(30);
-        }
-
-        return $slots;
+        return [
+            Appointment::STATUS_SCHEDULED => 'Programada',
+            Appointment::STATUS_COMPLETED => 'Completada',
+            Appointment::STATUS_CANCELLED => 'Cancelada',
+        ];
     }
 }

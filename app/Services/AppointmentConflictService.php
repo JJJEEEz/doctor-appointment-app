@@ -53,8 +53,8 @@ class AppointmentConflictService
 
         $query = Appointment::query()
             ->where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', $date)
-            ->where('status', '!=', 'Cancelado')
+            ->whereDate('date', $date)
+            ->where('status', '!=', Appointment::STATUS_CANCELLED)
             ->where('start_time', '<', $dbEndTime)
             ->where('end_time', '>', $dbStartTime);
 
@@ -72,8 +72,8 @@ class AppointmentConflictService
 
         $query = Appointment::query()
             ->where('patient_id', $patientId)
-            ->whereDate('appointment_date', $date)
-            ->where('status', '!=', 'Cancelado')
+            ->whereDate('date', $date)
+            ->where('status', '!=', Appointment::STATUS_CANCELLED)
             ->where('start_time', '<', $dbEndTime)
             ->where('end_time', '>', $dbStartTime);
 
@@ -96,8 +96,8 @@ class AppointmentConflictService
             })
             ->whereDoesntHave('appointments', function (Builder $query) use ($date, $dbStartTime, $dbEndTime) {
                 $query
-                    ->whereDate('appointment_date', $date)
-                    ->where('status', '!=', 'Cancelado')
+                    ->whereDate('date', $date)
+                    ->where('status', '!=', Appointment::STATUS_CANCELLED)
                     ->where('start_time', '<', $dbEndTime)
                     ->where('end_time', '>', $dbStartTime);
             });

@@ -20,10 +20,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://kit.fontawesome.com/a7de8752fc.js" crossorigin="anonymous"></script>
 
-    <wireui:scripts />
-        {{-- Livewire Scripts --}}
-        @livewireScripts
-
+        <wireui:scripts />
+        
         <!-- Styles -->
         @livewireStyles
     </head>
@@ -89,6 +87,9 @@
             confirmDelete('user', userId, { title: '¿Estás seguro?', text: 'Esta acción eliminará el usuario permanentemente.' });
         }
     </script>
+
+    {{-- Livewire Scripts - Must be at end of body --}}
+    @livewireScripts
 
     </body>
 </html>

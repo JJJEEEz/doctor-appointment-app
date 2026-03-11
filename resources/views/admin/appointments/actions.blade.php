@@ -1,4 +1,8 @@
 <div class="flex items-center gap-2">
+    <a href="{{ route('admin.appointments.consultation', $appointment) }}" class="inline-flex items-center px-3 py-1 text-sm bg-indigo-500 hover:bg-indigo-600 text-white rounded transition" title="Atender cita">
+        <i class="fas fa-stethoscope mr-1"></i> Atender
+    </a>
+
     <a href="{{ route('admin.appointments.show', $appointment) }}" class="inline-flex items-center px-3 py-1 text-sm bg-green-500 hover:bg-green-600 text-white rounded transition">
         <i class="fas fa-eye mr-1"></i> Ver
     </a>

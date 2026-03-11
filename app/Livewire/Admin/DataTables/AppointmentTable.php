@@ -26,8 +26,7 @@ class AppointmentTable extends Component
 
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery
-                        ->where('status', 'like', $search)
-                        ->orWhere('appointment_date', 'like', $search)
+                        ->where('date', 'like', $search)
                         ->orWhereHas('patient', function ($patientQuery) use ($search) {
                             $patientQuery
                                 ->where('name', 'like', $search)
@@ -38,7 +37,7 @@ class AppointmentTable extends Component
                         });
                 });
             })
-            ->orderByDesc('appointment_date')
+            ->orderByDesc('date')
             ->orderByDesc('start_time')
             ->paginate(10);
 

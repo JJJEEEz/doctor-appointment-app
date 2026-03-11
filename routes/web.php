@@ -3,9 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
+    'auth',
 ])->group(function () {
     // Redirige a la ruta de admin después de iniciar sesión
     Route::get('/', function () {

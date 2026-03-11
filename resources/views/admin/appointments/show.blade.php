@@ -28,12 +28,12 @@
 
                 <div>
                     <span class="text-sm font-semibold text-gray-700">Estado:</span>
-                    <p class="text-gray-900">{{ $appointment->status }}</p>
+                    <p class="text-gray-900">{{ $appointment->statusLabel() }}</p>
                 </div>
 
                 <div>
                     <span class="text-sm font-semibold text-gray-700">Fecha:</span>
-                    <p class="text-gray-900">{{ $appointment->appointment_date?->format('d/m/Y') }}</p>
+                    <p class="text-gray-900">{{ $appointment->date?->format('d/m/Y') }}</p>
                 </div>
 
                 <div>
@@ -42,8 +42,8 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <span class="text-sm font-semibold text-gray-700">Notas:</span>
-                    <p class="text-gray-900 whitespace-pre-line">{{ $appointment->notes ?: 'Sin notas registradas.' }}</p>
+                    <span class="text-sm font-semibold text-gray-700">Motivo:</span>
+                    <p class="text-gray-900 whitespace-pre-line">{{ $appointment->reason ?: 'Sin motivo registrado.' }}</p>
                 </div>
             </div>
 

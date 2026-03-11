@@ -2,7 +2,7 @@
     <div class="mb-4">
         <x-wire-input
             wire:model.live.debounce.300ms="search"
-            placeholder="Buscar por paciente, doctor, fecha o estado"
+            placeholder="Buscar por paciente, doctor o fecha"
         />
     </div>
 
@@ -26,12 +26,19 @@
                         <td class="px-4 py-2 border">{{ $appointment->id }}</td>
                         <td class="px-4 py-2 border">{{ $appointment->patient?->name ?? 'N/A' }}</td>
                         <td class="px-4 py-2 border">{{ $appointment->doctor?->user?->name ?? 'N/A' }}</td>
-                        <td class="px-4 py-2 border">{{ $appointment->appointment_date?->format('d/m/Y') }}</td>
+                        <td class="px-4 py-2 border">{{ $appointment->date?->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 border">{{ substr((string) $appointment->start_time, 0, 5) }}</td>
                         <td class="px-4 py-2 border">{{ substr((string) $appointment->end_time, 0, 5) }}</td>
                         <td class="px-4 py-2 border">
-                            <span class="px-2 py-1 text-xs rounded-full {{ $appointment->status === 'Cancelado' ? 'bg-red-100 text-red-700' : ($appointment->status === 'Completado' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700') }}">
-                                {{ $appointment->status }}
+                            @php
+                                $statusClass = match ($appointment->status) {
+                                    \App\Models\Appointment::STATUS_CANCELLED => 'bg-red-100 text-red-700',
+                                    \App\Models\Appointment::STATUS_COMPLETED => 'bg-green-100 text-green-700',
+                                    default => 'bg-blue-100 text-blue-700',
+                                };
+                            @endphp
+                            <span class="px-2 py-1 text-xs rounded-full {{ $statusClass }}">
+                                {{ $appointment->statusLabel() }}
                             </span>
                         </td>
                         <td class="px-4 py-2 border">
