@@ -40,6 +40,7 @@ return [
         'provider' => env('WHATSAPP_PROVIDER', 'callmebot'),
         'callmebot_api_key' => env('WHATSAPP_CALLMEBOT_API_KEY'),
         'callmebot_base_url' => env('WHATSAPP_CALLMEBOT_BASE_URL', 'https://api.callmebot.com/whatsapp.php'),
+        'default_country_prefix' => env('WHATSAPP_DEFAULT_COUNTRY_PREFIX', ''),
     ],
 
 ];

@@ -37,6 +37,11 @@ class WhatsAppService
         }
 
         $normalizedPhone = preg_replace('/\D+/', '', $phone) ?? '';
+        $defaultPrefix = (string) config('services.whatsapp.default_country_prefix', '');
+
+        if (strlen($normalizedPhone) === 10 && $defaultPrefix !== '') {
+            $normalizedPhone = $defaultPrefix.$normalizedPhone;
+        }
 
         if ($normalizedPhone === '') {
             Log::warning('Telefono invalido para WhatsApp.', ['phone' => $phone]);
@@ -55,6 +60,17 @@ class WhatsAppService
         if (! $response->successful()) {
             Log::warning('Error al enviar WhatsApp con CallMeBot.', [
                 'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+        }
+
+        $body = strtolower($response->body());
+
+        if (str_contains($body, 'error') || str_contains($body, 'invalid') || str_contains($body, 'missing')) {
+            Log::warning('Respuesta invalida de CallMeBot al enviar WhatsApp.', [
+                'phone' => $normalizedPhone,
                 'body' => $response->body(),
             ]);
 
