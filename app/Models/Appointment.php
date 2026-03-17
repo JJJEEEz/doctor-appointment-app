@@ -24,6 +24,8 @@ class Appointment extends Model
         'treatment',
         'consultation_notes',
         'prescriptions',
+        'whatsapp_confirmation_sent_at',
+        'whatsapp_reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -33,6 +35,8 @@ class Appointment extends Model
             'status' => 'integer',
             'duration' => 'integer',
             'prescriptions' => 'array',
+            'whatsapp_confirmation_sent_at' => 'datetime',
+            'whatsapp_reminder_sent_at' => 'datetime',
         ];
     }
 
