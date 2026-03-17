@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendAppointmentConfirmationJob;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Services\AppointmentConflictService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
@@ -46,7 +48,16 @@ class AppointmentController extends Controller
         $data = $this->validateAppointmentData($request);
         $this->validateConflicts($data);
 
-        Appointment::create($data);
+        $appointment = Appointment::create($data);
+
+        try {
+            SendAppointmentConfirmationJob::dispatchSync($appointment->id);
+        } catch (\Throwable $exception) {
+            Log::warning('No se pudo enviar la confirmacion de WhatsApp.', [
+                'appointment_id' => $appointment->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         session()->flash('swal', [
             'title' => '¡Exito!',

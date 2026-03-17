@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'enabled' => env('WHATSAPP_ENABLED', false),
+        'provider' => env('WHATSAPP_PROVIDER', 'callmebot'),
+        'callmebot_api_key' => env('WHATSAPP_CALLMEBOT_API_KEY'),
+        'callmebot_base_url' => env('WHATSAPP_CALLMEBOT_BASE_URL', 'https://api.callmebot.com/whatsapp.php'),
+    ],
+
 ];
