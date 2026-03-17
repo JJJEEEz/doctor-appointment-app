@@ -9,6 +9,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        $driver = DB::getDriverName();
+
         if (!Schema::hasTable('appointments')) {
             return;
         }
@@ -51,7 +53,7 @@ return new class extends Migration
             DB::statement('UPDATE appointments SET reason = notes WHERE reason IS NULL');
         }
 
-        if (Schema::hasColumn('appointments', 'status')) {
+        if ($driver !== 'sqlite' && Schema::hasColumn('appointments', 'status')) {
             $statusType = DB::table('information_schema.columns')
                 ->where('table_schema', DB::getDatabaseName())
                 ->where('table_name', 'appointments')
@@ -73,8 +75,15 @@ return new class extends Migration
             }
         }
 
-        DB::statement('UPDATE appointments SET date = CURDATE() WHERE date IS NULL');
-        DB::statement('UPDATE appointments SET duration = 15 WHERE duration IS NULL OR duration <= 0');
+        DB::table('appointments')
+            ->whereNull('date')
+            ->update(['date' => now()->toDateString()]);
+
+        DB::table('appointments')
+            ->where(function ($query) {
+                $query->whereNull('duration')->orWhere('duration', '<=', 0);
+            })
+            ->update(['duration' => 15]);
 
         if (Schema::hasColumn('appointments', 'appointment_date')) {
             Schema::table('appointments', function (Blueprint $table) {
@@ -88,7 +97,9 @@ return new class extends Migration
             });
         }
 
-        DB::statement('ALTER TABLE appointments MODIFY date DATE NOT NULL');
+        if ($driver !== 'sqlite') {
+            DB::statement('ALTER TABLE appointments MODIFY date DATE NOT NULL');
+        }
     }
 
     public function down(): void
