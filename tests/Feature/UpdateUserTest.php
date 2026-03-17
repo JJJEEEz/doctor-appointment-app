@@ -1,5 +1,6 @@
 <?php
 use App\Models\User;
+use App\Models\Specialty;
 use Spatie\Permission\Models\Role;
 
 test('Se puede actualizar un usuario', function () {
@@ -13,6 +14,7 @@ test('Se puede actualizar un usuario', function () {
 
         // Creamos un rol para asignar
     $role = Role::firstOrCreate(['name' => 'Doctor']);
+    $specialty = Specialty::query()->firstOrCreate(['name' => 'Cardiologia']);
 
     // 2) Autenticamos al primer usuario
     $this->actingAs($user);
@@ -26,7 +28,9 @@ test('Se puede actualizar un usuario', function () {
         'id_number' => '987654321',
         'phone' => '1234567890',
         'address' => 'Calle Actualizada 123',
-        'role' => 'Doctor', 
+        'role' => 'Doctor',
+        'speciality_id' => $specialty->id,
+        'medical_license_number' => 'DOC-12345',
     ]);
 
     // 4) Verificamos la respuesta del servidor
