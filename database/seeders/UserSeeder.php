@@ -19,6 +19,6 @@ class UserSeeder extends Seeder
                 'address' => 'Calle Falsa 123',
             ]
         );
-        $user->syncRoles(['Doctor']);
+        $user->syncRoles(['Doctorr']);
     }
 }
