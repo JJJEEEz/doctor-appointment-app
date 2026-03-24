@@ -27,6 +27,15 @@ class SendDailyAppointmentsReport extends Command
             ->orderBy('start_time')
             ->get();
 
+        $testRecipient = env('MAIL_TEST_TO_ADDRESS');
+
+        if (filled($testRecipient) && app()->environment(['local', 'testing'])) {
+            Mail::to($testRecipient)->send(new DailyAppointmentsReportMail($reportDate, $appointments));
+            $this->line('Reporte enviado en modo prueba a '.$testRecipient.'.');
+
+            return self::SUCCESS;
+        }
+
         $this->sendReportToAdmins($appointments, $reportDate);
         $this->sendReportToDoctors($appointments, $reportDate);
 

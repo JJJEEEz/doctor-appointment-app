@@ -6,9 +6,13 @@
     <title>Comprobante de cita</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #111827;">
-    <h2>Comprobante de cita medica</h2>
-
-    <p>Se ha registrado una nueva cita medica.</p>
+    @if(($recipientType ?? 'patient') === 'doctor')
+        <h2>Nueva cita asignada al doctor</h2>
+        <p>Se ha registrado una nueva cita y ha sido asignada al doctor.</p>
+    @else
+        <h2>Confirmación de cita para paciente</h2>
+        <p>La cita medica del paciente ha sido confirmada correctamente.</p>
+    @endif
 
     <ul>
         <li><strong>Paciente:</strong> {{ $appointment->patient?->name ?? 'N/D' }}</li>

@@ -190,21 +190,17 @@ class AppointmentController extends Controller
         try {
             $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.speciality']);
 
-            $emails = collect([
-                $appointment->patient?->email ?: $appointment->patient?->user?->email,
-                $appointment->doctor?->user?->email,
-            ])->filter(fn (?string $email) => filled($email))
-                ->unique()
-                ->values();
-
-            if ($emails->isEmpty()) {
-                return;
-            }
-
             $pdfContent = $this->appointmentPdfService->generateConfirmationPdf($appointment);
 
-            foreach ($emails as $email) {
-                Mail::to($email)->send(new AppointmentCreatedWithPdfMail($appointment, $pdfContent));
+            $patientEmail = $appointment->patient?->email ?: $appointment->patient?->user?->email;
+            $doctorEmail = $appointment->doctor?->user?->email;
+
+            if (filled($patientEmail)) {
+                Mail::to($patientEmail)->send(new AppointmentCreatedWithPdfMail($appointment, $pdfContent, 'patient'));
+            }
+
+            if (filled($doctorEmail)) {
+                Mail::to($doctorEmail)->send(new AppointmentCreatedWithPdfMail($appointment, $pdfContent, 'doctor'));
             }
         } catch (Throwable $exception) {
             Log::error('No se pudo enviar el comprobante PDF de la cita.', [

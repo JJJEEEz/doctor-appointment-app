@@ -18,13 +18,18 @@ class AppointmentCreatedWithPdfMail extends Mailable
     public function __construct(
         public Appointment $appointment,
         private readonly string $pdfContent,
+        private readonly string $recipientType = 'patient',
     ) {
     }
 
     public function envelope(): Envelope
     {
+        $subject = $this->recipientType === 'doctor'
+            ? 'Nueva cita asignada - Doctor'
+            : 'Confirmación de cita - Paciente';
+
         return new Envelope(
-            subject: 'Comprobante de cita medica',
+            subject: $subject,
         );
     }
 
@@ -34,6 +39,7 @@ class AppointmentCreatedWithPdfMail extends Mailable
             view: 'emails.appointment-created',
             with: [
                 'appointment' => $this->appointment,
+                'recipientType' => $this->recipientType,
             ],
         );
     }

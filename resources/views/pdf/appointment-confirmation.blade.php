@@ -41,10 +41,10 @@
 </head>
 <body>
 <div class="container">
-    <h1 class="title">Comprobante de cita medica</h1>
+    <h1 class="title">Comprobante de cita médica</h1>
 
     <div class="row"><span class="label">Paciente:</span> {{ $appointment->patient?->name ?? 'N/D' }}</div>
-    <div class="row"><span class="label">Correo paciente:</span> {{ $appointment->patient?->email ?? 'N/D' }}</div>
+    <div class="row"><span class="label">Correo del paciente:</span> {{ $appointment->patient?->email ?? 'N/D' }}</div>
     <div class="row"><span class="label">Doctor:</span> {{ $appointment->doctor?->user?->name ?? 'N/D' }}</div>
     <div class="row"><span class="label">Especialidad:</span> {{ $appointment->doctor?->speciality?->name ?? 'N/D' }}</div>
     <div class="row"><span class="label">Fecha:</span> {{ optional($appointment->date)->format('d/m/Y') }}</div>
@@ -53,7 +53,7 @@
     <div class="row"><span class="label">Motivo:</span> {{ $appointment->reason ?: '-' }}</div>
 
     <div class="footer">
-        Generado automaticamente por el sistema de citas medicas.
+        Generado automáticamente por el sistema de citas médicas.
     </div>
 </div>
 </body>
