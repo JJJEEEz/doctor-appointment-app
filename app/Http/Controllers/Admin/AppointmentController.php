@@ -3,17 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentCreatedWithPdfMail;
 use App\Models\Appointment;
 use App\Models\Patient;
+use App\Services\AppointmentPdfService;
 use App\Services\AppointmentConflictService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class AppointmentController extends Controller
 {
-    public function __construct(private readonly AppointmentConflictService $conflictService)
+    public function __construct(
+        private readonly AppointmentConflictService $conflictService,
+        private readonly AppointmentPdfService $appointmentPdfService,
+    )
     {
     }
 
@@ -46,7 +54,8 @@ class AppointmentController extends Controller
         $data = $this->validateAppointmentData($request);
         $this->validateConflicts($data);
 
-        Appointment::create($data);
+        $appointment = Appointment::create($data);
+        $this->sendAppointmentConfirmationEmails($appointment);
 
         session()->flash('swal', [
             'title' => '¡Exito!',
@@ -174,5 +183,30 @@ class AppointmentController extends Controller
             Appointment::STATUS_COMPLETED => 'Completada',
             Appointment::STATUS_CANCELLED => 'Cancelada',
         ];
+    }
+
+    private function sendAppointmentConfirmationEmails(Appointment $appointment): void
+    {
+        try {
+            $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.speciality']);
+
+            $pdfContent = $this->appointmentPdfService->generateConfirmationPdf($appointment);
+
+            $patientEmail = $appointment->patient?->email ?: $appointment->patient?->user?->email;
+            $doctorEmail = $appointment->doctor?->user?->email;
+
+            if (filled($patientEmail)) {
+                Mail::to($patientEmail)->send(new AppointmentCreatedWithPdfMail($appointment, $pdfContent, 'patient'));
+            }
+
+            if (filled($doctorEmail)) {
+                Mail::to($doctorEmail)->send(new AppointmentCreatedWithPdfMail($appointment, $pdfContent, 'doctor'));
+            }
+        } catch (Throwable $exception) {
+            Log::error('No se pudo enviar el comprobante PDF de la cita.', [
+                'appointment_id' => $appointment->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }
